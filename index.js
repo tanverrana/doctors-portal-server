@@ -30,16 +30,21 @@ async function run() {
         });
 
         app.get("/available", async (req, res) => {
-            const date = req.query.date || "May 15, 2022";
+            const date = req.query.date;
+
+            //get all the services
             const services = await serviceCollection.find().toArray();
 
+            //get the booking of that day
             const query = { date: date };
             const bookings = await bookingCollection.find(query).toArray();
+
+            //for each services
             services.forEach(service => {
                 const serviceBookings = bookings.filter(b => b.treatment === service.name);
                 const booked = serviceBookings.map(s => s.slot);
                 const available = service.slots.filter(s => !booked.includes(s));
-                service.available = available;
+                service.slots = available;
             })
             res.send(services);
         })
